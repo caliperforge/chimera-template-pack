@@ -1,0 +1,20 @@
+# Foundry
+out/
+cache/
+broadcast/
+
+# Echidna / Medusa
+echidna-corpus/
+medusa-corpus/
+crytic-export/
+.campaign-out/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Env (forks may need keys for forked-mainnet campaigns)
+.env
+.env.local

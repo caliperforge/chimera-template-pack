@@ -1,0 +1,141 @@
+name: ci
+
+# chimera-template-pack CI.
+#
+# On every push:
+#   1. Build the scaffold with `forge build`.
+#   2. Run the forge-side CryticToFoundry smoke test (skips cleanly when Setup
+#      is the template's revert-stub — the as-shipped template is green on
+#      smoke alone).
+#   3. If `src/` contains protocol contracts (fork has wired step §2 of
+#      USAGE.md), run a short Echidna campaign on CryticTester and capture the
+#      scorecard into `findings/<invariant>/scorecard.{json,md}` per invariant.
+#   4. Upload the raw campaign output + scorecards as a CI artifact.
+#
+# The green badge means: build clean + smoke green + (if wired) campaign
+# completed without crashing. It does NOT mean the campaign found nothing —
+# the scorecard.json's `invariants_violated` field is the source of truth for
+# that, and forks may legitimately ship with violations surfaced (the artifact
+# is itself the contest deliverable).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: default
+  ECHIDNA_TIMEOUT: '180'
+
+jobs:
+  build-and-smoke:
+    name: forge build + CryticToFoundry smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: forge install
+        run: |
+          forge install --no-commit foundry-rs/forge-std@v1.9.4 || true
+          forge install --no-commit Recon-Fuzz/chimera || true
+
+      - name: forge build
+        run: forge build --sizes
+
+      - name: CryticToFoundry smoke test
+        run: forge test --match-path test/recon/CryticToFoundry.sol -vv
+
+  echidna-campaign:
+    name: echidna campaign (only if src/ is wired)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build-and-smoke
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: forge install
+        run: |
+          forge install --no-commit foundry-rs/forge-std@v1.9.4 || true
+          forge install --no-commit Recon-Fuzz/chimera || true
+
+      - name: Detect whether src/ is wired
+        id: src_wired
+        run: |
+          # Count .sol files anywhere under src/ (excluding the placeholder README).
+          n=$(find src -type f -name '*.sol' 2>/dev/null | wc -l | tr -d ' ')
+          echo "n=$n" >> "$GITHUB_OUTPUT"
+          if [ "$n" -gt 0 ]; then
+            echo "src is wired ($n .sol files); will run echidna"
+            echo "wired=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "src/ is empty (template not yet stamped); skipping echidna"
+            echo "wired=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Echidna
+        if: steps.src_wired.outputs.wired == 'true'
+        uses: crytic/echidna-action@v2
+        with:
+          echidna-version: v2.2.5
+
+      - name: forge build
+        if: steps.src_wired.outputs.wired == 'true'
+        run: forge build
+
+      - name: Run echidna campaign
+        if: steps.src_wired.outputs.wired == 'true'
+        run: |
+          mkdir -p .campaign-out
+          set +e
+          echidna . --contract CryticTester --config echidna.yaml \
+              --test-limit 20000 \
+              --timeout "${ECHIDNA_TIMEOUT}" \
+              2>&1 | tee .campaign-out/echidna.out
+          # Echidna exit code may be non-zero on violation; we don't fail CI on
+          # that — the scorecard records the count.
+          set -e
+
+      - name: Capture scorecards
+        if: steps.src_wired.outputs.wired == 'true'
+        run: |
+          # Capture under each of the three seeded invariant slots. A fork
+          # that renames the invariants edits this list.
+          for inv in INV-001-solvency INV-002-shareprice-monotonic INV-003-access-control; do
+            mkdir -p "findings/$inv"
+            ./scripts/capture_scorecard.sh \
+              --campaign echidna \
+              --invariant "$inv" \
+              --input .campaign-out/echidna.out \
+              --out-dir "findings/$inv"
+          done
+
+      - name: Upload campaign output + scorecards
+        if: always() && steps.src_wired.outputs.wired == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-campaign-output
+          path: |
+            .campaign-out/*.out
+            findings/*/scorecard.json
+            findings/*/scorecard.md

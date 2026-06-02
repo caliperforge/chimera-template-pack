@@ -1,0 +1,2 @@
+# forge install populates this directory with forge-std and chimera.
+# Kept in the template so `forge build` resolves remappings before `forge install` runs.

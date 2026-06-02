@@ -1,0 +1,10 @@
+{
+  "invariant": "INV-001-solvency",
+  "campaign": "echidna",
+  "campaign_version": "2.2.5",
+  "captured_at": "2026-06-02T00:00:00Z",
+  "invariants_total": 3,
+  "invariants_violated": 0,
+  "ai_suggestions_included": 0,
+  "counterexamples": []
+}

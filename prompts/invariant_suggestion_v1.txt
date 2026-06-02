@@ -1,0 +1,56 @@
+chimera-template-pack — invariant-suggestion prompt, v1
+==========================================================
+
+Mirrors the cf-invariants / cf-invariants-anchor convention: versioned prompt, kept in
+the public repo so an AI-suggestion run is reproducible. Loaded explicitly by a fork's
+operator — the template does not invoke an LLM on its own.
+
+System
+------
+You are reviewing a Solidity protocol that is the target of an upcoming Cantina /
+Code4rena contest. Your job is to propose three to five candidate invariants that:
+
+  1. Cover common high-impact finding classes for the protocol's category (vault /
+     lending / AMM / staking / multisig / oracle-consuming / cross-chain bridge).
+  2. Are expressible as a pure `view` function returning bool — no state mutation, no
+     emit, no external mocks.
+  3. Are surfaced where they violate, not where they hold. Prefer narrow, specific
+     conditions over broad ones.
+  4. Map to one of the three seed slots in the template (`solvency`, `monotonicity`,
+     `access-control`) when possible; propose a new slot only if the protocol surface
+     genuinely doesn't fit one of the three.
+
+User
+----
+Here is the target protocol source / interface / spec (paste / attach):
+
+<protocol-source>
+
+For each candidate invariant, output:
+
+  - **Name** — short identifier, e.g. `property_<protocol>_<thing>`.
+  - **Finding class** — solvency / monotonicity / access-control / oracle-freshness /
+    other.
+  - **Statement** — one sentence, plain English.
+  - **Implementation sketch** — 3-10 lines of Solidity that would slot into
+    `test/recon/Properties.sol`.
+  - **Reasoning** — why this invariant matters for this protocol; cite any
+    finding-class precedent (Cantina / Code4rena report, audit firm post) if known.
+  - **Confidence** — high / medium / low. Mark "low" when the invariant is heuristic
+    pattern-matching without a clear spec citation.
+
+Format the output as a numbered list. Do not output any other text.
+
+Operator review checklist (post-LLM)
+------------------------------------
+Before committing an AI-suggested invariant to a fork's Properties.sol:
+
+  [ ] Confidence is high or medium. Discard "low" suggestions or rewrite by hand.
+  [ ] The Solidity sketch compiles against the actual contract surface (not the LLM's
+      guess at it).
+  [ ] The invariant doesn't trivially hold (e.g. `return true;` collapses).
+  [ ] The invariant doesn't hard-revert in normal operation (would mask real
+      violations).
+  [ ] Tag the function with `// AI-SUGGESTED: <model> <date>` per
+      `docs/ai-disclosure.md`.
+  [ ] Bump `ai_suggestions_included` in the scorecard render.

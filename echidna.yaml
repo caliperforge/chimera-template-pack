@@ -1,0 +1,36 @@
+# chimera-template-pack — Echidna campaign config
+#
+# Defaults are CI-friendly. Forks should raise testLimit + timeout for soak runs
+# (e.g. 1_000_000 / 1h before submitting a Cantina entry).
+
+testMode: assertion          # Properties.sol returns bool, but the Chimera pattern also
+                             # uses assert() inside before/after snapshots; assertion mode
+                             # catches both.
+
+# Bound a single CI campaign to fit a free-tier runner without thrashing.
+testLimit: 50000             # raise to 1_000_000 for local soak / pre-submit runs
+timeout: 300                 # seconds (5 min)
+seqLen: 100                  # transaction sequence depth
+shrinkLimit: 5000
+
+# Coverage-guided fuzz; Echidna's instrumentation is on by default.
+coverage: true
+corpusDir: "echidna-corpus"
+
+# Contract under test for the campaign. The Chimera pattern points Echidna at
+# CryticTester (test/recon/CryticTester.sol), which extends TargetFunctions +
+# Properties under a single deployable surface.
+contract: "CryticTester"
+
+# Filter: only call wrapped `target_*` and `helper_*` functions exposed in
+# TargetFunctions.sol (avoids Echidna mutating internal harness state directly).
+filterFunctions:
+  - "_logProperty(string)"
+filterBlacklist: true
+
+# Workers — 1 keeps CI deterministic; bump locally for parallel campaigns.
+workers: 1
+
+# Reporting.
+format: text                 # CI capture script (`scripts/capture_scorecard.sh`)
+                             # post-processes this with `sed` to strip ANSI.

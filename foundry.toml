@@ -1,0 +1,47 @@
+# chimera-template-pack — Foundry config
+#
+# Tracks Recon's create-chimera-app conventions: solc 0.8.28, fuzz runs sized for
+# CI-friendly campaigns (forks bump for local soak runs). Forks should override
+# `solc_version` if the target protocol pins a different release.
+
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+
+solc_version = "0.8.28"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+
+# Fuzzer settings used by `forge test`. The recon/CryticToFoundry harness uses these
+# for the forge-side replay of the campaign; Echidna and Medusa carry their own
+# campaign budgets in echidna.yaml / medusa.json.
+[fuzz]
+runs = 1000
+
+[invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
+call_override = false
+dictionary_weight = 80
+include_storage = true
+include_push_bytes = true
+
+# Remappings are also written to remappings.txt so Echidna + Medusa pick them up.
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "chimera/=lib/chimera/src/",
+    "@recon/=lib/chimera/src/",
+]
+
+# FFI is off by default. Forks that need cheatcode FFI (rare for invariant work)
+# must enable explicitly.
+ffi = false
+
+# Standard gas / memory limits — Echidna/Medusa override per their own configs.
+gas_limit = 9223372036854775807
+memory_limit = 2147483648
