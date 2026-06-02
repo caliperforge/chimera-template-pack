@@ -47,7 +47,7 @@ abstract contract Setup is BaseSetup {
         //     // Optional: set deterministic block / timestamp.
         //     vm.warp(1_700_000_000);
         //     vm.roll(18_000_000);
-        revert("TODO(protocol): Setup.setup() — wire the target protocol's deploys");
+        revert("TODO(protocol): Setup.setup() - wire the target protocol's deploys");
     }
 
     /// @notice List of actors the TargetFunctions modifiers cycle through.
