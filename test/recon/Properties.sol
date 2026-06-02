@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.28;
 
-import {Asserts} from "chimera/Asserts.sol";
-import {Setup} from "./Setup.sol";
 import {BeforeAfter} from "./BeforeAfter.sol";
 
 /// @notice Properties — three seeded protocol-specific invariants the campaign checks.
@@ -14,7 +12,7 @@ import {BeforeAfter} from "./BeforeAfter.sol";
 /// AI-tagging convention: if an invariant was AI-suggested (vs. hand-authored from a
 /// protocol-spec read), prefix with `// AI-SUGGESTED: <model> <date>` per the AI
 /// disclosure policy in `docs/ai-disclosure.md`. Reviewers grep for this tag.
-abstract contract Properties is Setup, BeforeAfter, Asserts {
+abstract contract Properties is BeforeAfter {
     // -------------------------------------------------------------------------
     // INV-001 — solvency / token conservation
     // -------------------------------------------------------------------------

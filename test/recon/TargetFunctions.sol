@@ -15,7 +15,7 @@ import {BeforeAfter} from "./BeforeAfter.sol";
 ///
 /// The Chimera convention: `target_*` functions wrap one protocol call each, optionally
 /// followed by `__snapshot()` / `__after()` calls that Properties.sol reads.
-abstract contract TargetFunctions is BaseTargetFunctions, Setup, BeforeAfter {
+abstract contract TargetFunctions is BaseTargetFunctions, BeforeAfter {
     // -------------------------------------------------------------------------
     // Actor modifiers — rotate msg.sender. Forks shouldn't need to edit these.
     // -------------------------------------------------------------------------
