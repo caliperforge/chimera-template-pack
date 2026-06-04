@@ -2,8 +2,7 @@
 
 This template repository is **Apache-2.0** by default. See [`LICENSE`](./LICENSE).
 
-Per the CaliperForge build-to-win roadmap §1 (`agents/build_squad_lead/outbox/build_to_win_roadmap_2026-06-01.md`),
-when a forked entry's scaffold is intended for **upstream merge** into a target protocol's
+When a forked entry's scaffold is intended for **upstream merge** into a target protocol's
 existing MIT-licensed codebase (as a `test/invariant/` directory or equivalent), the
 scaffold's merged subset should be dual-licensed:
 

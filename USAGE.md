@@ -84,21 +84,18 @@ proof.
 
 ## Step 6 — Hand the public repo URL to the target protocol
 
-Per build-to-win roadmap §1
-(`agents/build_squad_lead/outbox/build_to_win_roadmap_2026-06-01.md`), the artifact ships
-**with a protocol hand-off within 48 hours of public push**. Two paths, pick whichever
-fits the protocol's contribution norm:
+The artifact ships **with a protocol hand-off within 48 hours of public push**. Two paths,
+pick whichever fits the protocol's contribution norm:
 
 - **Issue.**  Open an issue on the target protocol's main repo, link the
   `chimera-<protocol>-<contest-slug>` repo, summarize the seeded invariants and the
-  reproduce-from-clone command. Calm professional register (Trail of Bits engineering-blog
-  voice), not marketing.
+  reproduce-from-clone command. Calm professional register, not marketing.
 - **PR.**  If the protocol is MIT-licensed and you're proposing upstream merge into
   `test/invariant/`, apply the MIT carve-out (`LICENSE-MIT-CARVEOUT.md`) to the
   merged subset and open the PR with the same body.
 
-Then log the entry in `agents/build_squad_lead/proof_register.md` — that's the Axis-B /
-Axis-C evidence row the Grant Team consumes regardless of contest placement.
+Then record the entry alongside the rest of the CaliperForge contribution log — the
+hand-off URL is the evidence row regardless of contest placement.
 
 ---
 
