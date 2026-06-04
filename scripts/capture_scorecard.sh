@@ -83,7 +83,11 @@ CAMPAIGN_VERSION="$($CAMPAIGN --version 2>/dev/null | head -1 || echo unknown)"
   printf '  "counterexamples": '
   if [ "$VIOLATED" -eq 1 ]; then
     printf '[{ "invariant_name": "%s", "raw": ' "$INVARIANT"
-    # JSON-escape the counterexample text.
+    # WHY: JSON-escape via python3's stdlib instead of jq — keeps the
+    # template-pack toolchain to sh + python3 (already required by Echidna /
+    # Medusa setups) so users don't need to install jq just to render a
+    # scorecard. Do not "helpfully" rewrite this to `jq` — it breaks the
+    # zero-extra-dependency contract.
     python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' < "$COUNTEREX_FILE"
     printf ' }]\n'
   else
