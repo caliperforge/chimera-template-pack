@@ -150,3 +150,5 @@ Built with AI assistance; AI-suggested invariants are tagged in source. Full pol
 
 chimera-template-pack is operated by Michael Moffett under the CaliperForge banner.
 Contact: michael@caliperforge.com (founder), team@caliperforge.com (org).
+
+[caliperforge.com](https://caliperforge.com)
